@@ -4,7 +4,7 @@ from chatbot.graph_builder import GraphBuilder
 from chatbot.llm_gemini import GeminiLLM
 
 app = FastAPI(title="LangGraph Chatbot + Email API")
-GEMINI_API_KEY = "AIzaSyBxMzHG-BSRHbC_WtbPjN8QaO1emhr1_kc"
+GEMINI_API_KEY = ""
 
 class ChatRequest(BaseModel):
     query: str

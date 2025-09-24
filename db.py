@@ -1,10 +1,12 @@
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
+from dotenv import load_dotenv
+load_dotenv()
+import os
 
 try:
     # Create MongoDB client
-    client = MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=5000)
-
+    client = MongoClient(os.getenv("MONGODB_URI"), serverSelectionTimeoutMS=5000)
     # Test connection
     client.admin.command("ping")
     print("✅ Database connected successfully!")

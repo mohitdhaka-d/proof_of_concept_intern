@@ -2,10 +2,13 @@ import imaplib
 import email
 from db import collection  # MongoDB collection for emails
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Your email credentials
-SENDER_EMAIL = "dhakad.mohit300@gmail.com"
-PASSWORD = "kevo twnj vuki qkfp"
+SENDER_EMAIL = os.getenv("SENDER_EMAIL")
+PASSWORD = os.getenv("EMAIL_PASSWORD")
 IMAP_SERVER = "imap.gmail.com"
 
 def check_replies_function():

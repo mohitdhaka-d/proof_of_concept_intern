@@ -5,6 +5,9 @@ import smtplib
 from datetime import datetime
 from db import collection
 from email.utils import make_msgid
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 
 def send_email(to_email: str, subject: str, body: str,thread_id=None):
@@ -21,8 +24,8 @@ def send_email(to_email: str, subject: str, body: str,thread_id=None):
 
     smtp_server = "smtp.gmail.com"
     smtp_port = 587  # TLS port
-    sender_email = "dhakad.mohit300@gmail.com"
-    password = "kevo twnj vuki qkfp"
+    sender_email = os.getenv("SENDER_EMAIL")
+    password = os.getenv("EMAIL_PASSWORD")
     status = "sent"
 
 

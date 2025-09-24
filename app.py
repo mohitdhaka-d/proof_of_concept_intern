@@ -4,6 +4,9 @@ from typing import Dict, Any, Optional
 from apscheduler.schedulers.background import BackgroundScheduler
 from chatbot.state import State
 import uuid
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Assuming your imports are correct
 from chatbot.graph_builder import GraphBuilder
@@ -14,7 +17,8 @@ from chatbot.llm_gemini import GeminiLLM
 session_store: Dict[str, Dict[str, Any]] = {}
 
 app = FastAPI(title="LangGraph Chatbot + Email API")
-GEMINI_API_KEY = "AIzaSyC6xTKW9RHSOA4HE9tOMxvl-59l8alqC38" # Make sure to set your API key
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# GEMINI_API_KEY = ""
 
 class ChatRequest(BaseModel):
     query: str
@@ -108,17 +112,3 @@ scheduler.add_job(check_replies_function,
                      coalesce=True)  # check every 10 seconds
 scheduler.start()
 print("🔄 Reply checker started in background...")
-
-# import time
-# try:
-#     while True:
-#         time.sleep(1)
-# except (KeyboardInterrupt, SystemExit):
-#     scheduler.shutdown()
-#     print("🛑 Scheduler stopped.")
-
-
-# @app.get("/check-replies")
-# def check_replies():
-#     check_replies_function()
-#     return {"status": "Checked inbox for replies"}

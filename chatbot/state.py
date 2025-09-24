@@ -7,3 +7,5 @@ class State(TypedDict):
     draft: str | None
     output: str
     decision: str
+    user_confirmation: str | None
+    status:str

@@ -8,6 +8,7 @@ class GraphBuilder:
         self.llm = model
         self.graph_builder = StateGraph(State)
 
+
          # Node 1: Detect intent
     def detect_intent_node(self, state: State):
         query = state["query"].lower()
@@ -32,21 +33,35 @@ class GraphBuilder:
         - Do not add explanations, comments, or instructions.  
         - The response must contain ONLY the email text.  
         - The email must include: a greeting, body, and closing.  
-
         """
         prompt = f"{SYSTEM_PROMPT}\n\nUser request: {state['query']}"
         result = self.llm.invoke(prompt)
         state["draft"] = result.content.strip()
         return state
     
+    # Assuming you have defined the confirm_send_node method in your class:
+    def confirm_send_node(self, state: State):
+        if state.get("user_confirmation"):
+            user_decision = state["user_confirmation"]
+            if user_decision == "send":
+            # Return a dictionary to update the state
+                return {"status": "confirmed"}
+            else:
+                return {"status": "cancelled"}
+        else:
+        # Return a dictionary to update the state
+            state["output"] = f"Draft email:\n\n{state['draft']}\n\nDo you want to send it? (send/cancel)"
+            state["status"] = "awaiting_input"
+        return state
+    
     def send_email_node(self, state: State):
-
         if state.get("recipient") and state.get("draft"):
+
             send_email(
-            to_email=state["recipient"],
-            subject=state.get("subject", "No Subject"),
-            body=state["draft"]
-        )
+                to_email=state["recipient"],
+                subject=state.get("subject", "No Subject"),
+                body=state["draft"],
+            )
             state["output"] = f"✅ Email sent to {state['recipient']}"
             # print("finally run ho gya")
     
@@ -59,13 +74,12 @@ class GraphBuilder:
         chatbot_node = BasicChatbotNode(self.llm)
         return chatbot_node.process(state)
 
-
     def setup_graph(self):
         builder = self.graph_builder
-
         # Add nodes
         builder.add_node("detect_intent", self.detect_intent_node)
         builder.add_node("draft_email", self.draft_email_node)
+        builder.add_node("confirm_send", self.confirm_send_node)  # New node
         builder.add_node("send_email", self.send_email_node)
         builder.add_node("normal_chat", self.normal_chat_node)
 
@@ -77,7 +91,21 @@ class GraphBuilder:
             lambda state: state["decision"],
             {"email": "draft_email", "chat": "normal_chat"}
             )
-        builder.add_edge("draft_email", "send_email")
+        builder.add_edge("draft_email", "confirm_send")
+        # builder.add_edge("draft_email", "send_email")
+
+        # Conditional logic based on confirm_send_node's return value
+        builder.add_conditional_edges(
+        "confirm_send",
+        # The lambda function now checks the "status" key
+        lambda state: state.get("status"), 
+        {
+            "confirmed": "send_email", 
+            "cancelled": END, 
+            "awaiting_input": END
+        }
+        )
+
         builder.add_edge("send_email", END)
         builder.add_edge("normal_chat", END)
 
